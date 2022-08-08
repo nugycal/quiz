@@ -1,0 +1,550 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link href="styles.css" rel="stylesheet">
+    <script>
+    function filterResults(e) {
+        let table = document.querySelector(".results").parentNode
+        let correct = document.querySelector("#correctCheckbox")
+        let incorrect = document.querySelector("#incorrectCheckbox")
+
+        if (!correct.checked) {
+            table.querySelectorAll(".table-success").forEach(el => el.classList.add("d-none"))
+        } else {
+            table.querySelectorAll(".table-success").forEach(el => el.classList.remove("d-none"))
+        }
+
+        if (!incorrect.checked) {
+            table.querySelectorAll(".table-danger").forEach(el => el.classList.add("d-none"))
+        } else {
+            table.querySelectorAll(".table-danger").forEach(el => el.classList.remove("d-none"))
+        }
+    }
+    function clearHistory() {
+        history = {
+            "date" : (new Date()).toLocaleString().split(",")[0],
+            "results" : []
+        }
+        localStorage.setItem("history", JSON.stringify(history))
+        window.location.reload();
+    }
+    document.addEventListener("keydown", (e) => {
+        if ((e.code === "Enter" || e.code === "NumpadEnter" || e.code === "Space") && document.querySelector(".selected")) {
+            document.querySelector(".submit").click();
+        } else if (e.code === "Backspace" || e.code === "KeyDd") {
+            document.querySelector(".next").click();
+        } else if (e.code === "KeyR") {
+            modal.toggle()
+        }
+    })
+    </script>
+</head>
+<div class="top d-flex justify-content-between">
+    <h2 class="branding">Quiz</h2>
+    <div class="d-flex align-items-center">
+        <div class="flex-shrink-0">
+            <select class="filter form-select">
+                <option value="none">No Filter</option>
+            </select>
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <h2 class="text-white question-count"></h2>
+        </div>
+    </div>
+    <h2 class="score d-none">0</h2>
+    <div>
+        <button type="button" class="btn btn-primary d-print-none report-button" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="bi bi-file-earmark-check"></i> Report</button>
+        <button type="button" class="btn btn-danger d-print-none d-none leave-revision" onclick="window.location.reload()"><i class="bi bi-box-arrow-in-right"></i> Leave Revision</button>
+    </div>
+        <!-- Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel"><i class="bi bi-file-earmark-check"></i> Daily Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between">
+                        <div class="form-elements">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="correctCheckbox" value="correct" onchange="filterResults()" checked>
+                                <label class="form-check-label" for="correctCheckbox" id="correctCheckboxLabel">Correct</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="incorrectCheckbox" value="incorrect" onchange="filterResults()" checked>
+                                <label class="form-check-label" for="incorrectCheckbox" id="incorrectCheckboxLabel">Incorrect</label>
+                            </div>
+                        </div>
+                        <div class="">
+                            <button class="btn btn-secondary revision-button d-none">Revise Incorrect</button>
+                        </div>
+                    </div>
+                    <div class="scrollable-table">
+                        <table class="table mh-40">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Prompt</th>
+                                    <th scope="col">Answer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="results">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger d-print-none" onclick="clearHistory()"><i class="bi bi-trash"></i> Clear History</button>
+                    <button type="button" class="btn btn-secondary d-print-none" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <div class="jumbotron question">
+
+    </div>
+    <div class="answers d-flex justify-content-around flex-wrap row">
+
+    </div>
+    <script>
+        let modal = new bootstrap.Modal(document.getElementById('reportModal'))
+        function shuffle(arr) {
+            let array = JSON.parse(JSON.stringify(arr))
+            for (let i = array.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1))
+                let temp = array[i]
+                array[i] = array[j]
+                array[j] = temp
+            }
+            return array
+        }
+        function prepend(value, array) {
+            var newArray = [value, ...array.slice()];
+            return newArray;
+        }
+        function uniq(a) {
+            return a.sort().filter(function(item, pos, ary) {
+                return !pos || item != ary[pos - 1];
+            });
+        }
+        Promise.all([fetch("questions.csv").then(res => res.text()), fetch("prompts.csv").then(res => res.text())])
+        .then(res => {
+            let prompts = res[1].split("\n").map(pair => pair.split("|"))
+            let data = []
+            res[0].split("\n").map(pair => pair.split("|")).forEach(el => {
+                let p = el[2].split(" ")
+                for (prompt of p) {
+                    let n = JSON.parse(JSON.stringify(el))
+                    n[2] = prompts[prompt-1][1]
+                    n[3] = prompts[prompt-1][2]
+                    n[4] = prompts[prompt-1][3]
+                    n[5] = prompts[prompt-1][4]
+                    n = prepend(prompts[prompt-1][0], n)
+                    data.push(n)
+                }
+            })
+            console.log(data.map(e => e[3] + e[1] + e[4] + " " + e[5] + e[2] + e[6]))
+            data = shuffle(data)
+
+            uniq(prompts.map(e => e[0])).map(e => {
+                let el = document.createElement("option")
+                el.innerText = e
+                el.value = e
+                document.querySelector(".filter").appendChild(el)
+            })
+
+            let content = document.querySelector(".content")
+            let question = document.querySelector(".question")
+            let answers = document.querySelector(".answers")
+
+            let score = 0
+            if (localStorage.getItem("score")) {
+                score = localStorage.getItem("score")
+            }
+            document.querySelector(".score").innerText = score
+            let history = {
+                "date" : (new Date()).toLocaleString().split(",")[0],
+                "results" : []
+            }
+            let revision = []
+
+            if (localStorage.getItem("history")) {
+                history = JSON.parse(localStorage.getItem("history"))
+                if (history["date"] === (new Date()).toLocaleString().split(",")[0]) {
+                    for (val of history["results"]) {
+                        let res = document.querySelector(".results")
+                        let row = document.createElement("tr")
+                        let cell = document.createElement("td")
+                        cell.innerText = val[1]
+                        cell.classList.add(val[0])
+                        row.appendChild(cell)
+                        cell = document.createElement("td")
+                        cell.innerText = val[2]
+                        row.appendChild(cell)
+                        res.appendChild(row)
+                        if (val[3] === "Incorrect") {
+                            row.classList.add("table-danger")
+                            document.querySelector("#incorrectCheckboxLabel").innerText = "Incorrect (" + res.querySelectorAll(".table-danger").length + ")"
+                            if (data.filter(e => e[0].includes(val[1].split(" ")[3]) && e.includes(val[2].split(" ")[0])).length !== 0) {
+                                revision.push(... data.filter(e => e[0].includes(val[1].split(" ")[3]) && e.includes(val[2].split(" ")[0])))
+                            }
+                        } else {
+                            row.classList.add("table-success")
+                            document.querySelector("#correctCheckboxLabel").innerText = "Correct (" + res.querySelectorAll(".table-success").length + ")"
+                        }
+                    }
+                    if (revision.length > 0) {
+                        document.querySelector(".revision-button").classList.remove("d-none")
+                        document.querySelector(".revision-button").addEventListener("click", () => {
+                            document.querySelector(".revision-button").classList.add("d-none")
+                            document.querySelector(".report-button").classList.add("d-none")
+                            modal.hide()
+                            document.querySelector(".leave-revision").classList.remove("d-none")
+                            data = shuffle(revision)
+                            progress = 0
+
+                            while (document.querySelector(".filter").firstChild) document.querySelector(".filter").removeChild(document.querySelector(".filter").firstChild)
+                            let none = document.createElement("option")
+                            none.innerText = "No Filter"
+                            none.value = "none"
+                            document.querySelector(".filter").appendChild(none)
+
+                            for (q of [... new Set(revision.map(a => a[0]))]) {
+                                let el = document.createElement("option")
+                                el.innerText = q
+                                el.value = q
+                                document.querySelector(".filter").appendChild(el)
+                            }
+
+                            if (progress >= data.length) {
+                                progress = progress % data.length
+                                data = shuffle(data)
+                            }
+
+                            document.querySelector(".question-count").innerText = (document.querySelector(".filter").value === 'none' ? (progress + 1) : data.filter(e => e[0] === document.querySelector(".filter").value).indexOf(data[progress]) + 1) + "/" + (document.querySelector(".filter").value === 'none' ? data.length : data.filter(e => e[0] === document.querySelector(".filter").value).length)
+
+                            while(question.firstChild) question.removeChild(question.firstChild)
+                            showQuestion(progress)
+
+                            while(answers.firstChild) answers.removeChild(answers.firstChild)
+                            showAnswers(progress)
+
+                            if (!submit.classList.contains("btn-secondary")) {
+                                submit.classList.add("btn-secondary")
+                                submit.classList.remove("btn-success")
+                                submit.setAttribute("disabled", true)
+                            }
+                            submit.innerHTML = "Check Answer"
+                        })
+                    }
+                } else {
+                    history = {
+                        "date" : (new Date()).toLocaleString().split(",")[0],
+                        "results" : []
+                    }
+                    localStorage.setItem("history", JSON.stringify(history))
+                }
+            }
+
+            let progress = 0
+            document.querySelector(".question-count").innerText = (document.querySelector(".filter").value === 'none' ? (progress + 1) : data.filter(e => e[0] === document.querySelector(".filter").value).indexOf(data[progress]) + 1) + "/" + (document.querySelector(".filter").value === 'none' ? data.length : data.filter(e => e[0] === document.querySelector(".filter").value).length)
+
+            document.querySelector(".filter").addEventListener("change", () => {
+                progress++
+                if (progress >= data.length) {
+                    progress = progress % data.length
+                    data = shuffle(data)
+                }
+                if (document.querySelector(".filter").value !== 'none') {
+                    let prompt = document.querySelector(".filter").value
+                    while (data[progress][0] !== prompt) {
+                        progress++
+                        if (progress >= data.length) {
+                            progress = progress % data.length
+                            data = shuffle(data)
+                        }
+                    }
+                }
+
+                if (progress >= data.length) {
+                    progress = progress % data.length
+                    data = shuffle(data)
+                }
+
+                document.querySelector(".question-count").innerText = (document.querySelector(".filter").value === 'none' ? (progress + 1) : data.filter(e => e[0] === document.querySelector(".filter").value).indexOf(data[progress]) + 1) + "/" + (document.querySelector(".filter").value === 'none' ? data.length : data.filter(e => e[0] === document.querySelector(".filter").value).length)
+
+                while(question.firstChild) question.removeChild(question.firstChild)
+                showQuestion(progress)
+
+                while(answers.firstChild) answers.removeChild(answers.firstChild)
+                showAnswers(progress)
+
+                if (!submit.classList.contains("btn-secondary")) {
+                    submit.classList.add("btn-secondary")
+                    submit.classList.remove("btn-success")
+                    submit.setAttribute("disabled", true)
+                }
+            })
+
+            let cardListener = (e) => {
+                let el = e.target.closest(".card")
+                while (document.querySelector(".selected")) {
+                    let a = document.querySelector(".selected")
+                    a.classList.remove("selected")
+                    a.classList.remove("bg-primary")
+                    a.classList.remove("text-white")
+                    a.classList.add("text-black")
+                    a.classList.add("bg-light")
+                }
+                el.classList.remove("bg-light")
+                el.classList.add("selected")
+                el.classList.add("bg-primary")
+                el.classList.add("text-white")
+                el.classList.remove("text-black")
+
+                if (submit.classList.contains("btn-secondary")) {
+                    submit.classList.remove("btn-secondary")
+                    submit.classList.add("btn-success")
+                    submit.removeAttribute("disabled")
+                }
+            }
+
+            let btn = document.createElement("button")
+            btn.classList.add("btn")
+            btn.classList.add("btn-secondary")
+            btn.classList.add("next")
+            btn.classList.add("d-print-none")
+            btn.innerText = "Skip Question"
+            btn.addEventListener("click", () => {
+                progress++
+                if (progress >= data.length) {
+                        progress = progress % data.length
+                        data = shuffle(data)
+                    }
+                if (document.querySelector(".filter").value !== 'none') {
+                    let prompt = document.querySelector(".filter").value
+                    while (data[progress][0] !== prompt) {
+                        progress++
+                        if (progress >= data.length) {
+                            progress = progress % data.length
+                            data = shuffle(data)
+                        }
+                    }
+                }
+
+                if (progress >= data.length) {
+                    progress = progress % data.length
+                    data = shuffle(data)
+                }
+
+                document.querySelector(".question-count").innerText = (document.querySelector(".filter").value === 'none' ? (progress + 1) : data.filter(e => e[0] === document.querySelector(".filter").value).indexOf(data[progress]) + 1) + "/" + (document.querySelector(".filter").value === 'none' ? data.length : data.filter(e => e[0] === document.querySelector(".filter").value).length)
+
+                while(question.firstChild) question.removeChild(question.firstChild)
+                showQuestion(progress)
+
+                while(answers.firstChild) answers.removeChild(answers.firstChild)
+                showAnswers(progress)
+
+                if (!submit.classList.contains("btn-secondary")) {
+                    submit.classList.add("btn-secondary")
+                    submit.classList.remove("btn-success")
+                    submit.setAttribute("disabled", true)
+                }
+            })
+            content.appendChild(btn)
+
+            let submit = document.createElement("button")
+            submit.classList.add("btn")
+            submit.classList.add("btn-secondary")
+            submit.classList.add("submit")
+            submit.classList.add("d-print-none")
+            submit.setAttribute("disabled", "true")
+            submit.innerText = "Check Answer"
+            submit.addEventListener("click", () => {
+                if (submit.innerText === "Check Answer") {
+                    submit.innerHTML = "Next Question <i class=\"bi bi-caret-right-fill\"></i>"
+                    document.querySelectorAll(".card-text").forEach(e => {
+                        let c = e.closest(".card")
+                        c.classList.remove("text-black")
+                        c.classList.add("text-white")
+                        if (e.innerText === data[progress][2]) {
+                            c.classList.remove("bg-light")
+                            c.classList.add("bg-success")
+                            c.querySelector(".card-title").innerText = "Correct"
+                        } else {
+                            c.classList.remove("bg-light")
+                            c.classList.add("bg-danger")
+                            // c.querySelector(".card-title").innerText = "Incorrect"
+                        }
+                        c.removeEventListener("click", cardListener)
+                    })
+                    if (document.querySelector(".selected").classList.contains("bg-danger")) {
+                        let res = document.querySelector(".results")
+                        let row = document.createElement("tr")
+                        row.classList.add("table-danger")
+                        let cell = document.createElement("td")
+                        cell.innerText = data[progress][3] + data[progress][1] + data[progress][4] + " " + data[progress][5]
+                        row.appendChild(cell)
+                        cell = document.createElement("td")
+                        cell.innerText = document.querySelector(".selected").querySelector(".card-text").innerText + " (Should be " + data[progress][2] + ")"
+                        row.appendChild(cell)
+                        res.appendChild(row)
+                        document.querySelector("#incorrectCheckboxLabel").innerText = "Incorrect (" + res.querySelectorAll(".table-danger").length + ")"
+                        history["results"].push([data[progress][0], data[progress][3] + data[progress][1] + data[progress][4] + " " + data[progress][5], cell.innerText, "Incorrect"])
+                        revision.push(... data.filter(e => e[0].includes(data[progress][0]) && e.includes(document.querySelector(".selected").querySelector(".card-text").innerText)))
+                        document.querySelector(".revision-button").classList.remove("d-none")
+                        document.querySelector(".revision-button").addEventListener("click", () => {
+                            document.querySelector(".revision-button").classList.add("d-none")
+                            document.querySelector(".report-button").classList.add("d-none")
+                            modal.hide()
+                            document.querySelector(".leave-revision").classList.remove("d-none")
+                            data = shuffle(revision)
+                            progress = 0
+
+                            while (document.querySelector(".filter").firstChild) document.querySelector(".filter").removeChild(document.querySelector(".filter").firstChild)
+                            let none = document.createElement("option")
+                            none.innerText = "No Filter"
+                            none.value = "none"
+                            document.querySelector(".filter").appendChild(none)
+
+                            for (q of [... new Set(revision.map(a => a[0]))]) {
+                                let el = document.createElement("option")
+                                el.innerText = q
+                                el.value = q
+                                document.querySelector(".filter").appendChild(el)
+                            }
+
+                            if (progress >= data.length) {
+                                progress = progress % data.length
+                                data = shuffle(data)
+                            }
+
+                            document.querySelector(".question-count").innerText = (document.querySelector(".filter").value === 'none' ? (progress + 1) : data.filter(e => e[0] === document.querySelector(".filter").value).indexOf(data[progress]) + 1) + "/" + (document.querySelector(".filter").value === 'none' ? data.length : data.filter(e => e[0] === document.querySelector(".filter").value).length)
+
+                            while(question.firstChild) question.removeChild(question.firstChild)
+                            showQuestion(progress)
+
+                            while(answers.firstChild) answers.removeChild(answers.firstChild)
+                            showAnswers(progress)
+
+                            if (!submit.classList.contains("btn-secondary")) {
+                                submit.classList.add("btn-secondary")
+                                submit.classList.remove("btn-success")
+                                submit.setAttribute("disabled", true)
+                            }
+                            submit.innerHTML = "Check Answer"
+                        })
+                    } else {
+                        localStorage.setItem("score", ++score)
+                        document.querySelector(".score").innerText = score
+                        let res = document.querySelector(".results")
+                        let row = document.createElement("tr")
+                        row.classList.add("table-success")
+                        let cell = document.createElement("td")
+                        cell.innerText = data[progress][3] + data[progress][1] + data[progress][4] + " " + data[progress][5]
+                        row.appendChild(cell)
+                        cell = document.createElement("td")
+                        cell.innerText = data[progress][2]
+                        row.appendChild(cell)
+                        res.appendChild(row)
+                        document.querySelector("#correctCheckboxLabel").innerText = "Correct (" + res.querySelectorAll(".table-success").length + ")"
+                        history["results"].push([data[progress][0], data[progress][3] + data[progress][1] + data[progress][4] + " " + data[progress][5], cell.innerText, "Correct"])
+                    }
+                    localStorage.setItem("history", JSON.stringify(history))
+                } else {
+                    progress++
+                    if (progress >= data.length) {
+                        progress = progress % data.length
+                        data = shuffle(data)
+                    }
+                    if (document.querySelector(".filter").value !== 'none') {
+                        let prompt = document.querySelector(".filter").value
+                        while (data[progress][0] !== prompt) {
+                            progress++
+                            if (progress >= data.length) {
+                                progress = progress % data.length
+                                data = shuffle(data)
+                            }
+                        }
+                    }
+
+                    if (progress >= data.length) {
+                        progress = progress % data.length
+                        data = shuffle(data)
+                    }
+
+                    document.querySelector(".question-count").innerText = (document.querySelector(".filter").value === 'none' ? (progress + 1) : data.filter(e => e[0] === document.querySelector(".filter").value).indexOf(data[progress]) + 1) + "/" + (document.querySelector(".filter").value === 'none' ? data.length : data.filter(e => e[0] === document.querySelector(".filter").value).length)
+
+                    while(question.firstChild) question.removeChild(question.firstChild)
+                    showQuestion(progress)
+
+                    while(answers.firstChild) answers.removeChild(answers.firstChild)
+                    showAnswers(progress)
+
+                    if (!submit.classList.contains("btn-secondary")) {
+                        submit.classList.add("btn-secondary")
+                        submit.classList.remove("btn-success")
+                        submit.setAttribute("disabled", true)
+                    }
+                    submit.innerHTML = "Check Answer"
+                }
+            })
+            content.appendChild(submit)
+
+            let showQuestion = (progress) => {
+                let prompt = document.createElement("h1")
+                prompt.innerText = data[progress][3] + data[progress][1] + data[progress][4]
+                question.appendChild(prompt)
+
+                let br = document.createElement("br")
+                question.appendChild(br)
+
+                prompt = document.createElement("h1")
+                prompt.innerText = data[progress][5] + "_".repeat(data[progress][2].length) + data[progress][6]
+                question.appendChild(prompt)
+
+
+            }
+            showQuestion(progress)
+
+            let showAnswers = (progress) => {
+                let card = document.createElement("div")
+                let classes = ["card", "text-black", "bg-light", "mb-3", "card-answer", "text-center", "col-12", "col-lg-6"]
+                classes.map(c => card.classList.add(c))
+                let header = document.createElement("div")
+                header.classList.add("card-header")
+                let body = document.createElement("div")
+                body.classList.add("card-body")
+                let title = document.createElement("h5")
+                title.classList.add("card-title")
+                let content = document.createElement("h2")
+                content.classList.add("card-text")
+                body.appendChild(title)
+                body.appendChild(content)
+                card.appendChild(title)
+                card.appendChild(body)
+
+                for (word of shuffle([...new Set([... data[progress].slice(1, 3),... data[progress].slice(7, data[progress].length)])]).filter(e => e !== '')) {
+                    let c = card.cloneNode(true)
+
+                    c.addEventListener("click", cardListener)
+
+                    c.querySelector(".card-text").innerText = word
+                    answers.appendChild(c)
+                }
+            }
+
+            showAnswers(progress)
+        })
+    </script>
+</div>
+</html>

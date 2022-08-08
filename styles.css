@@ -1,0 +1,66 @@
+html, body {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+.top {
+    width: 100%;
+    margin: 0px;
+    padding: 15px;
+    background-color: gray;
+}
+.branding {
+    font-size: 36px;
+    color: white;
+}
+.score {
+    font-size: 36px;
+    color: white;
+}
+/* https://stackoverflow.com/questions/63141494/how-to-create-jumbotron-in-bootstrap-5 */
+.jumbotron {
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    background-color: #e9ecef;
+    border-radius: .3rem;
+    text-align: center;
+}
+.next {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+}
+.submit {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+}
+.card-answer {
+    max-width: 18rem;
+    margin: 20px;
+    padding: 2%;
+    cursor: pointer;
+}
+.answers {
+    margin-top: 0px;
+    --bs-gutter-x: 0px;
+}
+.selected {
+    border: 5px solid skyblue;
+}
+.form-elements {
+    margin-bottom: 15px;
+}
+.scrollable-table {
+    overflow: auto;
+    max-height: 80%;
+}
+.modal-footer {
+    justify-content: space-between;
+}
+i {
+    margin: 5px;
+}
+.form-select {
+    width: auto;
+}
